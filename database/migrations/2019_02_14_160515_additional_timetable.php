@@ -13,7 +13,21 @@ class AdditionalTimetable extends Migration
      */
     public function up()
     {
-        //
+        Schema::create('additional_timetable', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('class_id');
+            $table->string('1')->nullable();
+            $table->string('2')->nullable();
+            $table->string('3')->nullable();
+            $table->string('4')->nullable();
+            $table->string('5')->nullable();
+            $table->string('6')->nullable();
+            $table->string('year');
+            $table->date('date');
+            $table->string('status');
+            $table->string('hash')->unique();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -23,6 +37,6 @@ class AdditionalTimetable extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('additional_timetable');
     }
 }

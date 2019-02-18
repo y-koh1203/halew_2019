@@ -65,6 +65,15 @@ class LectureController extends Controller
         $subjects = DB::table('subjects')->get();
 
         $charge = [];
+        $days = [
+            1 => 'sun',
+            2 => 'mon',
+            3 => 'tue',
+            4 => 'wed',
+            5 => 'thu',
+            6 => 'fri',
+            7 => 'sat'
+        ];
 
         foreach($subjects as $subject){
             $charge[$subject->id] =  $r->post($subject->subject_name);
@@ -77,12 +86,24 @@ class LectureController extends Controller
 
         try{
             foreach($charge as $subject_id => $teacher_id){
+                if($teacher_id == 0){
+                    foreach($days as $d){
+                        for($i = 1;$i <= 6; $i++){
+                            $sql = "update `${d}` "
+                            ."set `${i}` = case "
+                            ."when `${i}` = ${teacher_id} then 0 "
+                            ."else ${teacher_id} "
+                            ."end where class_id = ${class_id} ;";
+                            DB::update($sql);
+                        }
+                    }
+                }
+
                 $hash_key = hash('sha256', $class_id.$year.$subject_id);
                 $sql = "INSERT INTO `lectures` (`teacher_id`, `subject_id`, `class_id`, `year`, `hash`, `created_at`, `updated_at`) "
                 ."VALUES (${teacher_id}, ${subject_id}, ${class_id}, ${year}, '${hash_key}', null, null) "
                 ."ON DUPLICATE KEY UPDATE "
                 ."`teacher_id` = ${teacher_id} ;";
-                
                 DB::insert($sql);
             }
         }catch(\PDOException $e){

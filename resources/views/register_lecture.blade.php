@@ -62,7 +62,7 @@
                     }
                     xhr.open( 'GET', 'http://localhost/admin/classes/'+class_id+'/timetable/subject/'+subject_id+'/teachers' , false );
                     xhr.send();
-                    xhr.abort(); // 再利用する際にも abort() しないと再利用できないらしい.
+                    xhr.abort();
 
                     let html = '<option value="0">未選択</option>';
                     const parsed_data = JSON.parse(data);

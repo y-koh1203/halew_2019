@@ -75,9 +75,14 @@
                                     <p>授業なし</p>
                                 @else
                                     @foreach($lectures as $lecture)
-                                        @if($lecture->id == $timetable[$i][$j])
-                                        <p>{{ $lecture->subject_name }}</p>
-                                        <p>{{ $lecture->name }}</p>
+                                        @if($lecture->teacher_id == 0)
+                                            <p>授業なし</p>
+                                            @continue
+                                        @else
+                                            @if($lecture->id == $timetable[$i][$j])
+                                            <p>{{ $lecture->subject_name }}</p>
+                                            <p>{{ $lecture->name }}</p>
+                                            @endif
                                         @endif
                                     @endforeach
                                 @endif
