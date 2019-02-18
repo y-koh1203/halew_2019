@@ -13,9 +13,22 @@
         <link rel="stylesheet" href="{{ asset('css/bootstrap-grid.min.css') }}">
     </head>
     <script>
+
         document.addEventListener('DOMContentLoaded', () => {
+            const elem = document.getElementById('select_class');
+            elem.addEventListener('change', () => {
+                const id = elem.value;
+
+                if(id === 0){
+                    return false;
+                }
+
+                location.href = `{{ url('/admin/classes/${id}/lecture/all') }}`;
+            });
+
+
             const ss = document.getElementsByClassName('select_subject');
-            const id = {{ $class_id }}
+            const class_id = {{ $class_id }}
             Array.prototype.forEach.call(ss, v => {
                 v.addEventListener('change', () => {
                     const subject_id = v.value;
@@ -47,7 +60,7 @@
                             break;
                         }
                     }
-                    xhr.open( 'GET', 'http://localhost/admin/classes/'+id+'/timetable/subject/'+subject_id+'/teachers' , false );
+                    xhr.open( 'GET', 'http://localhost/admin/classes/'+class_id+'/timetable/subject/'+subject_id+'/teachers' , false );
                     xhr.send();
                     xhr.abort(); // 再利用する際にも abort() しないと再利用できないらしい.
 
@@ -62,54 +75,61 @@
             });
         });
     </script>
-    <style>
-        td, th{
-            empty-cells: show;
-            text-align: center;
-        }
-    </style>
     <body>
         <div class="container">    
             <div class="row">
-                <h1>clsss</h1>
+                <h1>register lecture and teacher</h1>
             </div>    
+            <p>クラスごとの科目と、科目担当を設定する</p>
             <div class="row">
-                <Form action="{{ url('/admin/classes/'.$class_id.'/timetable/registration') }}" method="post">
+                <div>
+                    <select name="class" id="select_class" class="form-control">
+                        <option value="0">未選択</option>
+                        @foreach($classes as $id => $class)
+                        <option value="@php echo $id + 1; @endphp" @if($class_id == $id + 1) selected @endif>{{ $class->class_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            @if(isset($lectures))
+            <div class="row">
+                <form action="{{ url('/admin/classes/'.$class_id.'/lecture/registration') }}" method="post">
                     <table class="table table-striped table-bordered">
                         <thead>
-                            <th></th>
-                            <th>日曜日</th>
-                            <th>月曜日</th>
-                            <th>火曜日</th>
-                            <th>水曜日</th>
-                            <th>木曜日</th>
-                            <th>金曜日</th>
-                            <th>土曜日</th>
+                            <tr>
+                                <th>科目名称</th>
+                                <th>担当教員</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        @for($i = 1; $i <= 6; $i++)
+                        @foreach($subjects as $key => $subject)
                             <tr>
-                                <th>{{ $i }}</th>
-                                @for($j = 1; $j <= 7; $j++)
+                                <td>{{ $subject->subject_name }}</td>
                                 <td>
                                     <div>
-                                        <select name="{{$j}}-{{$i}}" id="{{$j}}-{{$i}}" class="form-control select_subject">
-                                            <option value="0">授業無し</option>
-                                        @foreach($lectures as $lecture)
-                                            <option value="{{ $lecture->id }}">{{ $lecture->subject_name }}:{{ $lecture->name }}</option>
-                                        @endforeach
+                                        <select name="{{ $subject->subject_name }}" id="" class="form-control">
+                                            <option value="0">未選択</option>
+                                            @foreach($teachers as $key => $teacher)
+                                                @if($key == $subject->id)
+                                                    @foreach($teacher as $v)
+                                                        <option value="{{ $v->id }}">{{ $v->name }}</option>         
+                                                    @endforeach
+                                                @endif
+                                            @endforeach
                                         </select>
                                     </div>
                                 </td>
-                                @endfor
-                            </tr>                       
-                        @endfor
+                            </tr>
+                        @endforeach
                         </tbody>
                     </table>
+                    <div>
+                        <button type="submit">登録</button>
+                    </div>
                     {{ csrf_field() }}
-                    <button type="submit">登録</button>
-                </Form>
+                </form>
             </div>
+            @endif
         </div>
     </body>
 </html>

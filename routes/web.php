@@ -46,3 +46,8 @@ Route::get('/admin/classes/{class_id}/timetable','TimetableController@displayTim
 Route::get('/admin/classes/{class_id}/timetable/register','TimetableController@registerTimetable');
 Route::post('/admin/classes/{class_id}/timetable/registration','TimetableController@registrationTimetable');
 Route::get('/admin/classes/{class_id}/timetable/subject/{sub_id}/teachers','TimetableController@getTeachers');
+
+//lecture
+Route::get('/admin/classes/{class_id}/lecture','LectureController@registerLecture');
+Route::get('/admin/classes/{class_id}/lecture/all','LectureController@displayAllLecture');
+Route::post('/admin/classes/{class_id}/lecture/registration','LectureController@registrationLecture');

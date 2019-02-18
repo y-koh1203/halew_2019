@@ -18,8 +18,8 @@ class Lectures extends Migration
             $table->string('teacher_id');
             $table->string('subject_id');
             $table->string('class_id');
-            $table->string('time');
-            $table->date('date');
+            $table->string('year');
+            $table->string('hash')->unique();
             $table->timestamps();
         });
     }

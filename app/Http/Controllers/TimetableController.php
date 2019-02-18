@@ -17,9 +17,6 @@ class TimetableController extends Controller
 
         $classes = DB::table('classes')->get();
 
-        //配列にはどうも時間割がinsertされた順番が0から順に入るらしい
-        //どっから持ってきてるの...
-
         $timetable = [];
 
         $days = [
@@ -46,12 +43,17 @@ class TimetableController extends Controller
             } 
         }
 
-        $subjects = DB::table('subjects')->get();
+        $lectures = DB::table('lectures')
+        ->join('subjects', 'lectures.subject_id', '=' , 'subjects.id')
+        ->join('teachers', 'lectures.teacher_id', '=', 'teachers.id')
+        ->select('lectures.*', 'subjects.subject_name', 'teachers.name')
+        ->get()
+        ->where('class_id', $class_id);
         $classes = DB::table('classes')->get()->where('homeroom_teacher_id',$id);
         
         return view('timetable')->with([
             'class_id' => $class_id,
-            'subjects' => $subjects,
+            'lectures' => $lectures,
             'classes' => $classes,
             'timetable' => $data
         ]);
@@ -65,16 +67,20 @@ class TimetableController extends Controller
             return view('admin');
         }
 
-        $subjects = DB::table('subjects')->get();
-        
+        $lectures = DB::table('lectures')
+        ->join('subjects', 'lectures.subject_id', '=' , 'subjects.id')
+        ->join('teachers', 'lectures.teacher_id', '=', 'teachers.id')
+        ->select('lectures.*', 'subjects.subject_name', 'teachers.name')
+        ->get()
+        ->where('class_id', $class_id);
+
         return view('timetable_register')->with([
             'class_id' => $class_id,
-            'subjects'=> $subjects        
+            'lectures'=> $lectures        
         ]);
     }
 
     public function registrationTimetable(Request $r, $class_id){
-        //クラスに所属する生徒一覧を取得する
         $id = $r->session()->get('id');
 
         if($id === null){
@@ -97,7 +103,6 @@ class TimetableController extends Controller
         for($i = 1; $i <= 7; $i++){
             for($j = 0; $j <= 7; $j++){
                 $timetable[$i][] = $r->post($i.'-'.$j);
-                $teachers[$i][] = $r->post($i.'-'.$j.'-t');
             }
         }
 
@@ -142,12 +147,17 @@ class TimetableController extends Controller
             } 
         }
 
-        $subjects = DB::table('subjects')->get();
-        $classes = DB::table('classes')->get();
+        $lectures = DB::table('lectures')
+        ->join('subjects', 'lectures.subject_id', '=' , 'subjects.id')
+        ->join('teachers', 'lectures.teacher_id', '=', 'teachers.id')
+        ->select('lectures.*', 'subjects.subject_name', 'teachers.name')
+        ->get()
+        ->where('class_id', $class_id);
+        $classes = DB::table('classes')->get()->where('homeroom_teacher_id',$id);
         
         return view('timetable')->with([
             'class_id' => $class_id,
-            'subjects' => $subjects,
+            'lectures' => $lectures,
             'classes' => $classes,
             'timetable' => $data
         ]);

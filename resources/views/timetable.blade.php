@@ -42,11 +42,7 @@
                     @if(isset($class_id))
                         <option value="0">未選択</option>
                         @foreach($classes as $id => $class)
-                            @if($class->id === $class_id)
-                            <option value="@php echo $id + 1; @endphp" selected="selected">{{ $class->class_name }}</option>
-                            @else
-                            <option value="@php echo $id + 1; @endphp">{{ $class->class_name }}</option>
-                            @endif
+                            <option value="@php echo $id + 1; @endphp" @if($class->id == $class_id) selected @endif>{{ $class->class_name }}</option>
                         @endforeach
                     @else
                         <option value="0" selected>未選択</option>
@@ -76,11 +72,12 @@
                             @for($j = 1; $j <= 7; $j++)
                             <td>
                                 @if($timetable[$i][$j] == 0)
-                                授業なし
+                                    <p>授業なし</p>
                                 @else
-                                    @foreach($subjects as $subject)
-                                        @if($subject->id == $timetable[$i][$j])
-                                        {{ $subject->subject_name }}
+                                    @foreach($lectures as $lecture)
+                                        @if($lecture->id == $timetable[$i][$j])
+                                        <p>{{ $lecture->subject_name }}</p>
+                                        <p>{{ $lecture->name }}</p>
                                         @endif
                                     @endforeach
                                 @endif
