@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
-
+use Illuminate\Support\Carbon;
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -31,6 +31,34 @@ class DatabaseSeeder extends Seeder
                 'homeroom_teacher_id' => '1',
                 'year' => substr($class, 0, 1)
             ]);
+        }
+
+        //パスワードは誕生日 +  出席番号
+
+        $dt = Carbon::now();
+        foreach($classes as $k => $class){
+            for($i = 1; $i <= 10; $i++){
+                $cid = $k + 1;
+                $date = explode(' ',$dt);
+                $date = explode('-',$date[0]);
+                $str_date = '';
+                foreach($date as $k => $v){
+                    if($k > 2) continue;
+                    $str_date .= $v;
+                }
+
+                echo "[${str_date}]";
+
+                DB::table('students')->insert([
+                    'name' => $i,
+                    'birthday' => $dt,
+                    'password' => hash('sha256', $str_date.$cid.$i),
+                    'class_id' => $cid,
+                    'number' => $i,
+                    'status' => '1',
+                    'year' => substr($class, 0, 1)
+                ]);
+            } 
         }
     }
 }

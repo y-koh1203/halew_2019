@@ -17,7 +17,7 @@ class Questions extends Migration
             $table->increments('id');
             $table->integer('user_id');
             $table->string('question_title');
-            $table->integer('lecture_id');
+            $table->integer('unit_id');
             $table->text('question_body');
             $table->string('status');
             $table->timestamps();

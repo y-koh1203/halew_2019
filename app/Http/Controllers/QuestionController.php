@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller
 {
+    //質問を投稿
+    public function postQuestion(Request $r){
+        
+    }
+
     private function makeTags($text){
         $base_url = 'https://language.googleapis.com/v1/documents:analyzeEntities?key='.env('GOOGLE_API_KEY');
         $body = [
