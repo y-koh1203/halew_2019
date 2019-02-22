@@ -23,6 +23,8 @@ class Sat extends Migration
             $table->string('5')->nullable();
             $table->string('6')->nullable();
             $table->string('year');
+            $table->date('year_from');
+            $table->date('year_to');
             $table->string('status');
             $table->string('hash')->unique();
             $table->timestamps();

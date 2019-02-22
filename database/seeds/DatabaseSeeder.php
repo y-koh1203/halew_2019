@@ -36,9 +36,9 @@ class DatabaseSeeder extends Seeder
         //パスワードは誕生日 +  出席番号
 
         $dt = Carbon::now();
-        foreach($classes as $k => $class){
+        foreach($classes as $key => $class){
             for($i = 1; $i <= 10; $i++){
-                $cid = $k + 1;
+                $cid = $key + 1;
                 $date = explode(' ',$dt);
                 $date = explode('-',$date[0]);
                 $str_date = '';
@@ -47,7 +47,7 @@ class DatabaseSeeder extends Seeder
                     $str_date .= $v;
                 }
 
-                echo "[${str_date}]";
+                echo $cid;
 
                 DB::table('students')->insert([
                     'name' => $i,

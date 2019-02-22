@@ -100,8 +100,8 @@ class LectureController extends Controller
                 }
 
                 $hash_key = hash('sha256', $class_id.$year.$subject_id);
-                $sql = "INSERT INTO `lectures` (`teacher_id`, `subject_id`, `class_id`, `year`, `hash`, `created_at`, `updated_at`) "
-                ."VALUES (${teacher_id}, ${subject_id}, ${class_id}, ${year}, '${hash_key}', null, null) "
+                $sql = "INSERT INTO `lectures` (`teacher_id`, `subject_id`, `class_id`, `time`, `year`, `hash`, `created_at`, `updated_at`) "
+                ."VALUES (${teacher_id}, ${subject_id}, ${class_id}, null, ${year}, '${hash_key}', null, null) "
                 ."ON DUPLICATE KEY UPDATE "
                 ."`teacher_id` = ${teacher_id} ;";
                 DB::insert($sql);

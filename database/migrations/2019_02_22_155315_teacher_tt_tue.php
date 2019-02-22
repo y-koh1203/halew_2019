@@ -4,18 +4,18 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Fri extends Migration
+class TeacherTtTue extends Migration
 {
-    /**
+     /**
      * Run the migrations.
      *
      * @return void
      */
     public function up()
     {
-        Schema::create('fri', function (Blueprint $table) {
+        Schema::create('teacher_tt_tue', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('class_id');
+            $table->string('teacher_id');
             $table->string('1')->nullable();
             $table->string('2')->nullable();
             $table->string('3')->nullable();
@@ -38,6 +38,6 @@ class Fri extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fri');
+        Schema::dropIfExists('teacher_tt_tue');
     }
 }

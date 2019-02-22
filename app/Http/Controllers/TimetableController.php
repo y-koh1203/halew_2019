@@ -108,6 +108,8 @@ class TimetableController extends Controller
 
         $dt = Carbon::now('Asia/Tokyo');
         $year = $dt->year;
+        $year_from = $year.'-04-01';
+        $year_to = $year + 1 .'-03-31';
 
         $hash_base = $class_id.$year;
         $hash_key = hash('sha256', $hash_base);
@@ -115,8 +117,10 @@ class TimetableController extends Controller
         DB::beginTransaction();
         try{
             foreach($timetable as $k => $v){
-                $sql = "INSERT INTO `${days[$k]}` (`class_id`, `1`, `2`, `3`, `4`, `5`, `6`, `year`, `status`, `hash`, `created_at`, `updated_at`) "
-                ."VALUES (${class_id}, ${v[1]}, ${v[2]}, ${v[3]}, ${v[4]}, ${v[5]}, ${v[6]}, ${year}, 1, '${hash_key}', null, null) "
+                dd($v);
+                die();
+                $sql = "INSERT INTO `${days[$k]}` (`class_id`, `1`, `2`, `3`, `4`, `5`, `6`, `year`, `year_from`, `year_to`, `status`, `hash`, `created_at`, `updated_at`) "
+                ."VALUES (${class_id}, ${v[1]}, ${v[2]}, ${v[3]}, ${v[4]}, ${v[5]}, ${v[6]}, ${year}, '${year_from}', '${year_to}', 1, '${hash_key}', null, null) "
                 ."ON DUPLICATE KEY UPDATE "
                 ."`1` = ${v[1]}, "
                 ."`2` = ${v[2]}, "
@@ -124,6 +128,17 @@ class TimetableController extends Controller
                 ."`4` = ${v[4]}, "
                 ."`5` = ${v[5]}, "
                 ."`6` = ${v[6]} ;"; 
+
+                // $sql_t = "INSERT INTO `${days[$k]}` (`class_id`, `1`, `2`, `3`, `4`, `5`, `6`, `year`, `year_from`, `year_to`, `status`, `hash`, `created_at`, `updated_at`) "
+                // ."VALUES (${class_id}, ${v[1]}, ${v[2]}, ${v[3]}, ${v[4]}, ${v[5]}, ${v[6]}, ${year}, '${year_from}', '${year_to}', 1, '${hash_key}', null, null) "
+                // ."ON DUPLICATE KEY UPDATE "
+                // ."`1` = ${v[1]}, "
+                // ."`2` = ${v[2]}, "
+                // ."`3` = ${v[3]}, "
+                // ."`4` = ${v[4]}, "
+                // ."`5` = ${v[5]}, "
+                // ."`6` = ${v[6]} ;"; 
+
                 DB::insert($sql);
             }
         }catch(\PDOException $e){

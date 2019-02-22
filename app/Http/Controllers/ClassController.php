@@ -32,7 +32,7 @@ class ClassController extends Controller
         }
 
         $classes = DB::table('classes')->get()->where('homeroom_teacher_id', '=', $id);
-        $students = DB::table('users')->get()->where('class_id','=',$class_id);
+        $students = DB::table('students')->get()->where('class_id','=',$class_id);
 
         return view('class')->with([
             'class_id' => $class_id,

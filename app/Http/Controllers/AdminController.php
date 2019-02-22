@@ -34,6 +34,33 @@ class AdminController extends Controller
         }
         
         $r->session()->put('id', $user_data[0]->id);
+
+        $days = [
+            1 => 'sun',
+            2 => 'mon',
+            3 => 'tue',
+            4 => 'wed',
+            5 => 'thu',
+            6 => 'fri',
+            7 => 'sat'
+        ];
+        $lectures = [
+            'sun' => [],
+            'mon' => [],
+            'tue' => [],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => []
+        ];
+
+        foreach($days as $d){
+            $lecture = DB::table($d)->get();
+            foreach($lecture as $v){
+
+            }
+        }
+
         return view('home');
     }
 
@@ -109,7 +136,7 @@ class AdminController extends Controller
     public function getBelongStudentInClass(Request $r, $class_id){
         //クラスに所属する生徒一覧を取得する
 
-        $res = DB::table('users')->get()->where('class_id','=',$class_id);
+        $res = DB::table('students')->get()->where('class_id','=',$class_id);
 
         return json_encode($res);
         //Ajaxなので、JSONを返す

@@ -51,3 +51,12 @@ Route::get('/admin/classes/{class_id}/timetable/subject/{sub_id}/teachers','Time
 Route::get('/admin/classes/{class_id}/lecture','LectureController@registerLecture');
 Route::get('/admin/classes/{class_id}/lecture/all','LectureController@displayAllLecture');
 Route::post('/admin/classes/{class_id}/lecture/registration','LectureController@registrationLecture');
+
+
+/*
+    API ROUTE
+*/
+
+//authnication student
+Route::post('/auth','UserController@authnication');
+Route::post('/auth/check','UserController@checkAuth');
