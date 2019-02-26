@@ -14,11 +14,32 @@
     </head>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            let count = 0;
             const ss = document.getElementsByClassName('select_subject');
-            const id = {{ $class_id }}
+            const id = {{ $class_id }};
             Array.prototype.forEach.call(ss, v => {
                 v.addEventListener('change', () => {
-                    const subject_id = v.value;
+                    const lecture_id = v.value;
+                    if(lecture_id == 0){
+                        if(v.style.border === '2px solid red'){
+                            count--;
+                        }
+                        v.style.border = '2px solid green';
+
+                    if(count > 0){
+                        document.getElementById('error').innerHTML = '<span>他クラスの授業と重複している教員があります。<span>'; 
+                        document.getElementById('btn-submit').disabled = true;
+                    }else{
+                        document.getElementById('error').innerHTML = '<span></span>';
+                        document.getElementById('btn-submit').disabled = false;
+                    }
+                        
+                        return false;
+                    }
+                    const splited_code = v.name.split('-');
+                    
+                    const day = splited_code[0];
+                    const day_num = splited_code[1];
                     let data = {};
                     let xhr = new XMLHttpRequest;
 
@@ -47,17 +68,28 @@
                             break;
                         }
                     }
-                    xhr.open( 'GET', 'http://localhost/admin/classes/'+id+'/timetable/subject/'+subject_id+'/teachers' , false );
+
+                    xhr.open( 'GET', 'http://localhost/admin/check/'+day+'/'+day_num+'/'+lecture_id , false );
                     xhr.send();
                     xhr.abort(); // 再利用する際にも abort() しないと再利用できないらしい.
 
-                    let html = '<option value="0">未選択</option>';
-                    const parsed_data = JSON.parse(data);
-                    parsed_data.forEach(o => {
-                        html += `<option value="${o.id}">${o.name}</option>`;
-                        
-                    })
-                    document.getElementById(v.id+'-t').innerHTML = html;
+                    if(JSON.parse(data).result === true){
+                        if(v.style.border === '2px solid red'){
+                            count--;
+                        }
+                        v.style.border = '2px solid green';
+                    }else{
+                        v.style.border = '2px solid red';
+                        count++;
+                    }
+
+                    if(count > 0){
+                        document.getElementById('error').innerHTML = '<span>他クラスの授業と重複している教員があります。<span>'; 
+                        document.getElementById('btn-submit').disabled = true;
+                    }else{
+                        document.getElementById('error').innerHTML = '<span></span>';
+                        document.getElementById('btn-submit').disabled = false;
+                    }
                 });
             });
         });
@@ -67,14 +99,19 @@
             empty-cells: show;
             text-align: center;
         }
+
+        #error{
+            color: red;
+        }
     </style>
     <body>
         <div class="container">    
             <div class="row">
                 <h1>clsss</h1>
-            </div>    
+            </div>   
+            <p id="error"></p> 
             <div class="row">
-                <Form action="{{ url('/admin/classes/'.$class_id.'/timetable/registration') }}" method="post">
+                <Form action="{{ url('/admin/classes/'.$class_id.'/timetable/registration') }}" method="post" id="tt-form">
                     <table class="table table-striped table-bordered">
                         <thead>
                             <th></th>
@@ -107,7 +144,9 @@
                         </tbody>
                     </table>
                     {{ csrf_field() }}
-                    <button type="submit">登録</button>
+                    <div>
+                        <button type="submit" class="btn btn-lg btn-primary" id="btn-submit">登録する</button>
+                    </div>      
                 </Form>
             </div>
         </div>

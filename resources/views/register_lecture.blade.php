@@ -112,7 +112,12 @@
                                             @foreach($teachers as $key => $teacher)
                                                 @if($key == $subject->id)
                                                     @foreach($teacher as $v)
-                                                        <option value="{{ $v->id }}">{{ $v->name }}</option>         
+                                                        @foreach($lectures as $lecture)
+                                                            @if ($lecture->subject_id == $subject->id)
+                                                                <option value="{{ $v->id }}" @if($lecture->teacher_id == $v->id) selected @endif>{{ $v->name }}</option>                                       
+                                                                @break
+                                                            @endif
+                                                        @endforeach
                                                     @endforeach
                                                 @endif
                                             @endforeach
