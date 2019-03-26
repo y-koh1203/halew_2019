@@ -21,11 +21,11 @@ class AdminController extends Controller
 
     //認証
     public function authnication(Request $r){
-        $name = $r->post('name');
+        $lid = $r->post('login_id');
         $password = $r->post('password');
 
         $user_data = DB::table('teachers')
-        ->where('name', '=', $name)
+        ->where('login_id', '=', $lid)
         ->where('password', '=', hash('sha256',$password))
         ->first();
 
@@ -59,8 +59,8 @@ class AdminController extends Controller
         ];
 
         $teacher_data = DB::table('teachers')
-        ->get()
-        ->where('id', $user_data->id);
+        ->where('id', $user_data->id)
+        ->first();
 
         $data = [];
         for($i = 1; $i <= 7; $i++){
@@ -85,10 +85,16 @@ class AdminController extends Controller
         ->get()
         ->where('teacher_id', $user_data->id);
 
+        $d = $this->getWeekCalender(true, Carbon::now());
+
+        //dd($data);
+
         return view('home')->with([
             'timetable' => $data,
             'teacher_data' => $teacher_data,
-            'lectures' => $lectures
+            'lectures' => $lectures,
+            'tn' => $teacher_data->name,
+            'date' => $d
         ]);
     }
 
@@ -108,10 +114,12 @@ class AdminController extends Controller
         $password = $r->post('password');
         $c1 = $r->post('charge1');
         $c2 = $r->post('charge2');
+        $lid = $r->post('login_id');
 
         $res = DB::table('teachers')->insert([
             'name' => $name,
             'password' => hash('sha256', $password),
+            'login_id' => $lid,
             'charge_1' => $c1,
             'charge_2' => $c2,
             'status' => '1'
@@ -213,6 +221,10 @@ class AdminController extends Controller
             } 
         }
 
+        $teacher_data = DB::table('teachers')
+        ->where('id', $id)
+        ->first();
+
         $lectures = DB::table('lectures')
         ->join('subjects', 'lectures.subject_id', '=' , 'subjects.id')
         ->join('teachers', 'lectures.teacher_id', '=', 'teachers.id')
@@ -221,10 +233,14 @@ class AdminController extends Controller
         ->get()
         ->where('teacher_id', $id);
 
+        $d = $this->getWeekCalender(true, Carbon::now());
+
         return view('home')->with([
             'timetable' => $data,
             'teacher_data' => $teacher_data,
-            'lectures' => $lectures
+            'lectures' => $lectures,
+            'date' => $d,
+            'tn'  => $teacher_data->name
         ]);
     }
 
@@ -264,5 +280,80 @@ class AdminController extends Controller
 
         //生徒のinsert
         //出席番号周りの重複対策をする
+    }
+
+    private function getWeekCalender($isStartSun = true, $date = "") {
+        $today = new Carbon( $date );
+        $todayDay = $today->day;
+        $startDate = $this->getStartDay( $today->toDateString("Y-m-d"), $isStartSun );
+        $startDay = $startDate->day;
+        // 週の最終日を取得
+        // note. コピーを作成しないと元のインスタンスの値が変更される
+        $lastDay = $startDate->copy()->addDay(7)->day;
+        
+        // 開始日のある月の最終日を取得
+        $limitDay = $startDate->copy()->endOfMonth()->day;
+        
+        $month = $startDate->month;
+        $offset = $limitDay - $startDay;
+        $day = $startDay;
+        $weekArr = [];
+        $i = 0;
+        while($i < 7) {
+            $day = $startDay + $i;
+            // 月を跨いだ時
+            if( $day > $limitDay ) {
+            $day = $i - $offset;
+            if($day === 1) {
+                $month += 1;
+            }
+            if($month > 12) {
+                $month = 1;
+            }
+            }
+            if($isStartSun) {
+            $week = $this->getWeekByIndex($i);
+            } else {
+            $week = $this->getWeekByIndex($i+1);
+            }
+            $weekArr[] = [
+            'month' => $month,
+            'day'   => $day,
+            'week'  => $week,
+            'today' => $todayDay === $day? true : false,
+            ];
+            $i++;
+        }
+    
+        return $weekArr;
+    }
+
+    private function getStartDay($today, $isStartSun) {
+        $dt = new Carbon( $today );
+        
+        // $today が週の内何日目か (Sun = 0)
+        $w = $dt->dayOfWeek;
+        
+        // 月曜始まりのとき
+        if( !$isStartSun ) {
+            // 今日が日曜なら前の月曜
+            if($w === 0) {
+            $w = 7;
+            }
+            $w -= 1;
+        }
+        
+        return $dt->subDay( $w );
+    }
+
+    private function getWeekByIndex($i) {
+        $arr = ['Sun.', 'Mon.', 'Tue.', 'Wed.', 'Thu.', 'Fri.', 'Sat.'];
+        $len = count($arr);
+    
+        if($i >= $len) {
+            $i -= $len;
+        }
+    
+        return $arr[$i];
     }
 }

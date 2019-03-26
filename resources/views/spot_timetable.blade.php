@@ -76,14 +76,35 @@ td{
 
 #select_class{
     width: 20%;
+    margin: 1% 0;
+}
+
+.spot-list{
+    margin-top: 4%;
+}
+
+.result-box{
+    width: 20%;
+    margin-top: 1%;
+    margin-bottom: 2%;
+    border-radius: 3px;
+    border: 2px solid lightgreen;
+}
+
+.fa-check-circle{
+    background-color: lightgreen;
+    padding: 1%;
+    /* border-radius: 3px 0 0 3px; */
+    border: 2px solid lightgreen;
+    color: white;
 }
 
 </style>
 <div class="container">    
 <div class="row">
-        <h2 class="heading">時間割設定</h2>     
+        <h2 class="heading">スポット時間割設定</h2>     
     </div>
-    <div class="row"><p>各クラスの時間割の設定・管理を行えます</p></div>
+    <div class="row"><p>特定の日時に、カスタムした時間割を設定できます</p></div>
     <div class="row">
         <hr>
     </div>
@@ -105,60 +126,132 @@ td{
             @endif
         </select> 
     </div>
-    <p id="error"></p> 
+    @if(isset($success))
+        @if($success)
+        <div class="row">
+            <div class="result-box">
+                <i class="fas fa-check-circle"></i>
+                <span>更新が完了しました</span>
+            </div>
+        </div>
+        @endif
+    @endif
     <div class="row">
-        <form action="{{ url('/admin/classes/'.$class_id.'/timetable/registration') }}" method="post" id="tt-form">
+        @if(isset($lectures))
+        <form action="{{ url('/admin/timetable/spot/class/'.$class_id.'/registration') }}" method="post">
             <table class="table table-striped table-bordered">
                 <thead>
-                    <th class="cell-none"></th>
-                    <th class="cell-th">日曜日</th>
-                    <th class="cell-th">月曜日</th>
-                    <th class="cell-th">火曜日</th>
-                    <th class="cell-th">水曜日</th>
-                    <th class="cell-th">木曜日</th>
-                    <th class="cell-th">金曜日</th>
-                    <th class="cell-th">土曜日</th>
+                    <tr>
+                        <th class="cell-th">1</th>
+                        <th class="cell-th">2</th>
+                        <th class="cell-th">3</th>
+                        <th class="cell-th">4</th>
+                        <th class="cell-th">5</th>
+                        <th class="cell-th">6</th>
+                        <th class="cell-th">日付</th>      
+                    </tr>
                 </thead>
                 <tbody>
-                @for($i = 1; $i <= 6; $i++)
+                    
                     <tr>
-                        <th class="cell-th-row">
-                            <div class="cell-th-flex">
-                                {{ $i }}
-                            </div>
-                        </th>
-                        @for($j = 1; $j <= 7; $j++)
-                        <td>
+                        @for($i = 1;$i < 7;$i++)
+                        <td class="cell-td">
                             <div class="cell-td-flex">
-                                <select name="{{$j}}-{{$i}}" id="{{$j}}-{{$i}}" class="form-control select_subject">
-                                    <option value="0">授業無し</option>
-                                @foreach($lectures as $lecture)
-                                    <option value="{{ $lecture->id }}" 
-                                        @if($timetable[$i][$j] ==  $lecture->id)
-                                            selected
-                                        @endif
-                                    >{{ $lecture->subject_name }}:{{ $lecture->name }}</option>
-                                @endforeach
+                                <select name="spot-{{ $i }}" class="form-control">
+                                    <option value="0">未選択</option>
+                                    @foreach($lectures as $k => $lecture)
+                                    <option value="{{ $lecture->id }}">{{ $lecture->subject_name }}:{{ $lecture->name }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </td>
                         @endfor
-                    </tr>                       
-                @endfor
+                        <td class="cell-td">
+                            <div class="cell-td-flex">
+                                <input class="form-control" name="spot-date" type="date" data-date-format="YYYY-MM-DD" id="example-date-input" required>
+                            </div>
+                        </td>
+                    </tr>   
                 </tbody>
             </table>
             {{ csrf_field() }}
             <div class="button-wrap">
                 <button type="submit" class="btn btn-lg btn-primary" id="btn-submit">登録する</button>
             </div>      
-        </Form>
+        </form>
+        @endif
     </div>
+    @if(isset($registed))
+        <div class="row spot-list">
+            <h3>登録済みのスポット時間割</h3>   
+            <hr> 
+        </div>
+        @if(count($registed) > 0)
+        <div>
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th class="cell-th">1</th>
+                        <th class="cell-th">2</th>
+                        <th class="cell-th">3</th>
+                        <th class="cell-th">4</th>
+                        <th class="cell-th">5</th>
+                        <th class="cell-th">6</th>
+                        <th class="cell-th">日付</th>      
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($registed as $datum)
+                    <tr>
+                        @for($i = 1;$i < 7;$i++)
+                        <td class="cell-td">
+                            <div class="cell-td-flex">
+                                @if($datum->$i == 0)
+                                    授業なし
+                                @else
+                                    @foreach($lectures as $lecture)
+                                        @if($lecture->id == $datum->$i)
+                                            {{ $lecture->subject_name }}:{{ $lecture->name }}
+                                        @endif
+                                    @endforeach
+                                @endif
+                            </div>
+                        </td>
+                        @endfor
+                        <td class="cell-td">
+                            <div class="cell-td-flex">
+                                {{$datum->date}}
+                            </div>
+                        </td>
+                        <td class="cell-td">
+                            <div class="cell-td-flex">
+                                <form action="{{ url('/admin/timetable/spot/delete') }}" method="POST" id="del-form">
+                                    <input type="hidden" name="del-id" value="{{ $datum->id }}">
+                                    <input type="hidden" name="class_id" value="{{ $class_id }}">
+                                    <button type="submit" class="btn btn-warning">削除</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr> 
+                    @endforeach  
+                </tbody>
+            </table>
+        </div>
+        @else
+        <div>
+            <p>現在未登録です</p>
+        </div>
+        @endif
+    @endif
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         let count = 0;
         const ss = document.getElementsByClassName('select_subject');
+        @if(isset($class_id))
         const id = {{ $class_id }};
+        @endif
 
         const elem = document.getElementById('select_class');
         elem.addEventListener('change', () => {
@@ -168,9 +261,20 @@ td{
                 return false;
             }
 
-            location.href = `{{ url('/admin/timetable/class/${id}/register') }}`;
+            location.href = `{{ url('/admin/timetable/spot/class/${id}/register') }}`;
         });
- 
+
+        const form = document.getElementById('del-form')
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (window.confirm("削除を実行しますか？")) {
+                form.submit();
+            }else{
+                return false;
+
+            }
+        })
+
         Array.prototype.forEach.call(ss, v => {
             v.addEventListener('change', () => {
                 const lecture_id = v.value;

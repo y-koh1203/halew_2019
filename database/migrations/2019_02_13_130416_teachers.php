@@ -17,6 +17,7 @@ class Teachers extends Migration
             $table->increments('id');
             $table->string('name');
             $table->string('password');
+            $table->string('login_id')->unique();
             $table->string('charge_1');
             $table->string('charge_2')->nullable();
             $table->string('status');

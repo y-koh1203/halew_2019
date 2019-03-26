@@ -16,11 +16,10 @@ class Usres extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            //$table->string('nickname');
+            $table->string('login_id');
             $table->date('birthday');
             $table->string('password');
             $table->string('class_id');
-            $table->integer('year');
             $table->integer('number');
             $table->string('status');
             $table->timestamps();

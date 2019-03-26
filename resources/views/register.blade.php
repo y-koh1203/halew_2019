@@ -40,6 +40,12 @@
                         </div>
 
                         <div class="row">
+                            <div class="col-sm-12">
+                                <input type="text" name="login_id">
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <select name="charge1" id="c1">
                             @foreach($subjects as $key => $subject)
                                 <option value="@php echo $key + 1; @endphp">{{ $subject->subject_name }}</option>

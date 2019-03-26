@@ -20,6 +20,7 @@ Route::post('/user/register', 'UserController@registerProfile');
 
 //admin signin
 Route::get('/admin', 'AdminController@signin');
+Route::get('/logout', 'AdminController@signout');
 //admin signin authnication
 Route::post('/admin/auth', 'AdminController@authnication');
 
@@ -42,15 +43,24 @@ Route::get('/admin/classes','ClassController@index');
 Route::get('/admin/classes/{class_id}','ClassController@getBelongStudentInClass');
 
 //timetable
-Route::get('/admin/classes/{class_id}/timetable','TimetableController@displayTimetable');
-Route::get('/admin/classes/{class_id}/timetable/register','TimetableController@registerTimetable');
+Route::get('/admin/timetable','TimetableController@index');
+Route::get('/admin/timetable/class/{class_id}/','TimetableController@displayTimetable');
+Route::get('/admin/timetable/class/{class_id}/register','TimetableController@registerTimetable');
 Route::post('/admin/classes/{class_id}/timetable/registration','TimetableController@registrationTimetable');
+
+Route::get('/admin/timetable/spot','SpotTimetableController@index');
+Route::get('/admin/timetable/spot/class/{class_id}/register','SpotTimetableController@registerSpot');
+Route::post('/admin/timetable/spot/class/{class_id}/registration','SpotTimetableController@registration');
+Route::get('/admin/timetable/spot/class/{class_id}/register','SpotTimetableController@registerSpot');
+Route::post('/admin/timetable/spot/delete','SpotTimetableController@delete');
+
 Route::get('/admin/classes/{class_id}/timetable/subject/{sub_id}/teachers','TimetableController@getTeachers');
 Route::get('/admin/check/{day}/{time}/{lecture_id}','TimetableController@teacherExistCheck');
 
 //lecture
-Route::get('/admin/classes/{class_id}/lecture','LectureController@registerLecture');
-Route::get('/admin/classes/{class_id}/lecture/all','LectureController@displayAllLecture');
+Route::get('/admin/lecture','LectureController@index');
+Route::get('/admin/lecture/class/{class_id}','LectureController@registerLecture');
+Route::get('/admin/lecture/class/{class_id}/set','LectureController@displayAllLecture');
 Route::post('/admin/classes/{class_id}/lecture/registration','LectureController@registrationLecture');
 
 
@@ -61,3 +71,8 @@ Route::post('/admin/classes/{class_id}/lecture/registration','LectureController@
 //authnication student
 Route::post('/auth','UserController@authnication');
 Route::post('/auth/check','UserController@checkAuth');
+
+Route::get('/signout','UserController@signout');
+
+//timetable
+Route::get('/timetable/{class_id}','UserController@getTimetable');

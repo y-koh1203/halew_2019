@@ -8,6 +8,26 @@ use Illuminate\Support\Carbon;
 
 class LectureController extends Controller
 {
+    public function index(Request $r){
+        $id = $r->session()->get('id');
+
+        if($id === null){
+            return view('admin');
+        }
+
+        $teacher_name = DB::table('teachers')
+        ->where('id', $id)
+        ->first();
+
+        $classes = DB::table('classes')->get()
+        ->where('homeroom_teacher_id',$id);
+        
+        return view('register_lecture')->with([
+            'classes' => $classes,
+            'tn' => $teacher_name->name
+        ]);
+    }
+
     public function registerLecture(Request $r, $class_id){
         $id = $r->session()->get('id');
 
@@ -15,12 +35,17 @@ class LectureController extends Controller
             return view('admin');
         }
 
+        $teacher_name = DB::table('teachers')
+        ->where('id', $id)
+        ->first();
+
         $classes = DB::table('classes')->get()
         ->where('homeroom_teacher_id',$id);
         
         return view('register_lecture')->with([
             'classes' => $classes,
-            'class_id' => $class_id
+            'class_id' => $class_id,
+            'tn' => $teacher_name->name
         ]);
     }
 
@@ -31,6 +56,10 @@ class LectureController extends Controller
         if($id === null){
             return view('admin');
         }
+
+        $teacher_name = DB::table('teachers')
+        ->where('id', $id)
+        ->first();
         
         $lectures = [];
         $subjects = [];
@@ -52,13 +81,19 @@ class LectureController extends Controller
         ->select('lectures.*', 'subjects.subject_name', 'teachers.name')
         ->get()
         ->where('class_id', $class_id);
+
+        foreach($subjects as $subject){
+            $sql = 'select * from teachers where charge_1 = '.$subject->id.' or charge_2 = '. $subject->id.' ;';
+            $teachers[$subject->id] = DB::select($sql);
+        }
         
         return view('register_lecture')->with([
             'classes' => $classes,
             'class_id' => $class_id,
             'lectures' => $lectures,
             'subjects' => $subjects,
-            'teachers' => $teachers
+            'teachers' => $teachers,
+            'tn' => $teacher_name->name
         ]);
     }
 
@@ -68,6 +103,10 @@ class LectureController extends Controller
         if($id === null){
             return view('admin');
         }
+
+        $teacher_name = DB::table('teachers')
+        ->where('id', $id)
+        ->first();
 
         //登録ごのLectureを変更した場合に空白になる問題を修正
 
@@ -119,19 +158,39 @@ class LectureController extends Controller
                             $lecture_check = $cl;
                         }
                     }
-    
-                    //設定が変更された教員の時間割を書き換え
-                    foreach($days as $d){
-                        for($i = 1;$i <= 6; $i++){
-                            $sql = "update `teacher_tt_${d}` "
-                            ."set `${i}` = case "
-                            ."when `${i}` = ".$lecture_check->id." then 0 "
-                            ."else 0 "
-                            ."end where teacher_id =  ".$lecture_check->teacher_id." ;";
-    
-                            DB::update($sql);
+
+                    if($lecture_check != null){
+                        //設定が変更された教員の時間割を書き換え
+                        foreach($days as $d){
+                            for($i = 1;$i <= 6; $i++){
+                                $sql = "update `teacher_tt_${d}` "
+                                ."set `${i}` = case "
+                                ."when `${i}` = ".$lecture_check->id." then 0 "
+                                ."else 0 "
+                                ."end where teacher_id =  ".$lecture_check->teacher_id." ;";
+        
+                                DB::update($sql);
+                            }
                         }
+
+                        if($teacher_id == 0){
+                            foreach($days as $d){
+                                for($i = 1;$i <= 6; $i++){
+                                    $sql = "update `${d}` "
+                                    ."set `${i}` = case "
+                                    ."when `${i}` = ".$lecture_check->id." then ".$lecture_check->id." "
+                                    ."else 0 "
+                                    ."end where class_id = ${class_id} ;";
+                                    
+                                    //echo nl2br('id:0 + '.$sql);
+        
+                                    DB::update($sql);
+                                }
+                            }
+                        }    
                     }
+    
+                  
 
                     //設定が変更された教員の時間割を書き換え
                     //教員が重複するリスクあり
@@ -146,22 +205,6 @@ class LectureController extends Controller
                     //         DB::update($sql);
                     //     }
                     // }
-    
-                    if($teacher_id == 0){
-                        foreach($days as $d){
-                            for($i = 1;$i <= 6; $i++){
-                                $sql = "update `${d}` "
-                                ."set `${i}` = case "
-                                ."when `${i}` = ".$lecture_check->id." then ".$lecture_check->id." "
-                                ."else 0 "
-                                ."end where class_id = ${class_id} ;";
-                                
-                                //echo nl2br('id:0 + '.$sql);
-    
-                                DB::update($sql);
-                            }
-                        }
-                    }    
                 }
 
                 $hash_key = hash('sha256', $class_id.$year.$subject_id);
@@ -201,8 +244,9 @@ class LectureController extends Controller
             'class_id' => $class_id,
             'lectures' => $lectures,
             'subjects' => $subjects,
-            'teachers' => $teachers
+            'teachers' => $teachers,
+            'success' => true,
+            'tn' => $teacher_name->name
         ]);
     }
-
 }
